@@ -6,6 +6,7 @@
 
 namespace VisualStudioSolutionUpdater
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -28,7 +29,7 @@ namespace VisualStudioSolutionUpdater
             string[] resolvedNOrderReferences = MSBuildUtilities.ProjectsIncludingNOrderDependencies(existingProjects).ToArray();
 
             // Filter to only new projects
-            string[] newReferences = resolvedNOrderReferences.Except(existingProjects).ToArray();
+            string[] newReferences = resolvedNOrderReferences.Except(existingProjects, StringComparer.InvariantCultureIgnoreCase).ToArray();
 
             if (newReferences.Length == 0)
             {
