@@ -49,12 +49,17 @@ namespace VisualStudioSolutionUpdater
 
                         if (Directory.Exists(targetArgument))
                         {
-                            errorCode = FixAllSolutions(args[1], false);
+                            string validatingAllSolutions = $"Validating all solutions in `{targetArgument}`";
+                            Console.WriteLine(validatingAllSolutions);
+                            errorCode = FixAllSolutions(targetArgument, false);
                         }
                         else if (File.Exists(targetArgument))
                         {
+                            string validatingSingleFile = $"Validating solution `{targetArgument}`";
+                            Console.WriteLine(validatingSingleFile);
                             if (!UpdateSingleSolution(targetArgument, false))
                             {
+                                Console.WriteLine(targetArgument);
                                 errorCode = 1;
                             }
                         }
@@ -71,14 +76,14 @@ namespace VisualStudioSolutionUpdater
 
                     if (Directory.Exists(targetPath))
                     {
-                        string updatingAllSolutionsInDirectory = $"Updating all Visual Studio Solutions (*.sln) in {targetPath}";
+                        string updatingAllSolutionsInDirectory = $"Updating all Visual Studio Solutions (*.sln) in `{targetPath}`";
                         Console.WriteLine(updatingAllSolutionsInDirectory);
                         FixAllSolutions(targetPath, true);
                         errorCode = 0;
                     }
                     else if (File.Exists(targetPath))
                     {
-                        string updatingSingleFile = $"Updating single solution {targetPath}";
+                        string updatingSingleFile = $"Updating solution `{targetPath}`";
                         Console.WriteLine(updatingSingleFile);
                         UpdateSingleSolution(targetPath, true);
                         errorCode = 0;
@@ -127,7 +132,7 @@ namespace VisualStudioSolutionUpdater
             }
             catch (Exception ex)
             {
-                string errorMessage = $"Bad Solution {targetSolution} {ex.Message}";
+                string errorMessage = $"Bad Solution `{targetSolution}` Error `{ex.Message}`";
 
                 Console.WriteLine(errorMessage);
             }
