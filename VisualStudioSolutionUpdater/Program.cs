@@ -57,9 +57,8 @@ namespace VisualStudioSolutionUpdater
                         {
                             string validatingSingleFile = $"Validating solution `{targetArgument}`";
                             Console.WriteLine(validatingSingleFile);
-                            if (!UpdateSingleSolution(targetArgument, false))
+                            if (UpdateSingleSolution(targetArgument, false))
                             {
-                                Console.WriteLine(targetArgument);
                                 errorCode = 1;
                             }
                         }
