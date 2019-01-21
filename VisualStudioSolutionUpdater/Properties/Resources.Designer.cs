@@ -61,7 +61,7 @@ namespace VisualStudioSolutionUpdater.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Usage: VisualStudioSolutionUpdater [validate] directory/solution
+        ///   Looks up a localized string similar to Usage: VisualStudioSolutionUpdater [validate] directory/solution [ignore.txt]
         ///
         ///Given either a Visual Studio Solution (*.sln) or a Directory to Scan; Validate
         ///or update any solution file that is missing an N-Order ProjectReference Project
@@ -69,9 +69,9 @@ namespace VisualStudioSolutionUpdater.Properties {
         ///
         ///Invalid Command/Arguments. Valid commands are:
         ///
-        ///[directory/solution]  - [MODIFIES] If given a solution file or a directory
-        ///                        find all solution files then opening each solution
-        ///                        find all N-Order ProjectReferenc [rest of string was truncated]&quot;;.
+        ///Directory-Solution [IgnorePatterns.txt]
+        ///    [MODIFIES] If given a solution file or a directory find all solution
+        ///    files then opening each solution find all N-Order ProjectReference projects, [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string HelpMessage {
             get {

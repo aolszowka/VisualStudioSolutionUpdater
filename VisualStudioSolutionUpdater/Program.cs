@@ -10,6 +10,7 @@ namespace VisualStudioSolutionUpdater
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using VisualStudioSolutionUpdater.Properties;
 
@@ -49,9 +50,24 @@ namespace VisualStudioSolutionUpdater
 
                         if (Directory.Exists(targetArgument))
                         {
-                            string validatingAllSolutions = $"Validating all solutions in `{targetArgument}`";
-                            Console.WriteLine(validatingAllSolutions);
-                            errorCode = FixAllSolutions(targetArgument, false);
+                            string[] ignoredSolutionPatterns = new string[0];
+
+                            if (args.Length == 2)
+                            {
+                                string validatingAllSolutions = $"Validating all solutions in `{targetArgument}`";
+                                Console.WriteLine(validatingAllSolutions);
+                            }
+                            else
+                            {
+                                string ignoredSolutionsArgument = args[2];
+                                string validatingAllSolutions = $"Validating all solutions in `{targetArgument}` except those filtered by `{ignoredSolutionsArgument}`";
+                                Console.WriteLine(validatingAllSolutions);
+
+                                // Because we're going to constantly use this for lookups save it off
+                                ignoredSolutionPatterns = _GetIgnoredSolutionPatterns(ignoredSolutionsArgument).ToArray();
+                            }
+
+                            errorCode = FixAllSolutions(targetArgument, ignoredSolutionPatterns, false);
                         }
                         else if (File.Exists(targetArgument))
                         {
@@ -75,9 +91,24 @@ namespace VisualStudioSolutionUpdater
 
                     if (Directory.Exists(targetPath))
                     {
-                        string updatingAllSolutionsInDirectory = $"Updating all Visual Studio Solutions (*.sln) in `{targetPath}`";
-                        Console.WriteLine(updatingAllSolutionsInDirectory);
-                        FixAllSolutions(targetPath, true);
+                        IEnumerable<string> ignoredSolutionPatterns = new string[0];
+
+                        if (args.Length == 1)
+                        {
+                            string updatingAllSolutionsInDirectory = $"Updating all Visual Studio Solutions (*.sln) in `{targetPath}`";
+                            Console.WriteLine(updatingAllSolutionsInDirectory);
+                        }
+                        else
+                        {
+                            string ignoredSolutionsArgument = args[1];
+                            string updatingAllSolutionsInDirectory = $"Updating all solutions in `{targetPath}` except those filtered by `{ignoredSolutionsArgument}`";
+                            Console.WriteLine(updatingAllSolutionsInDirectory);
+
+                            // Because we're going to constantly use this for lookups save it off
+                            ignoredSolutionPatterns = _GetIgnoredSolutionPatterns(ignoredSolutionsArgument).ToArray();
+                        }
+
+                        FixAllSolutions(targetPath, ignoredSolutionPatterns, true);
                         errorCode = 0;
                     }
                     else if (File.Exists(targetPath))
@@ -102,6 +133,22 @@ namespace VisualStudioSolutionUpdater
             }
 
             Environment.Exit(errorCode);
+        }
+
+        private static IEnumerable<string> _GetIgnoredSolutionPatterns(string targetIgnoreFile)
+        {
+            if (!File.Exists(targetIgnoreFile))
+            {
+                string exceptionMessage = $"The specified ignore pattern file at `{targetIgnoreFile}` did not exist or was not accessible.";
+                throw new InvalidOperationException(exceptionMessage);
+            }
+
+            IEnumerable<string> ignoredPatterns =
+                File
+                .ReadLines(targetIgnoreFile)
+                .Where(currentLine => !currentLine.StartsWith("#"));
+
+            return ignoredPatterns;
         }
 
         private static int ShowUsage()
@@ -144,12 +191,17 @@ namespace VisualStudioSolutionUpdater
         /// (*.sln) and attempt to update their N-Order ProjectReferences.
         /// </summary>
         /// <param name="targetDirectory">The directory to scan for Solution Files.</param>
+        /// <param name="ignoredSolutionPatterns">An IEnumerable of ignored solution patterns.</param>
+        /// <param name="saveChanges">Indicates whether or not to save the changes to the solutions.</param>
         /// <returns>An <see cref="int"/> indicating the number of solution files that were updated.</returns>
-        static int FixAllSolutions(string targetDirectory, bool saveChanges)
+        static int FixAllSolutions(string targetDirectory, IEnumerable<string> ignoredSolutionPatterns, bool saveChanges)
         {
             int numberOfFixedSolutions = 0;
 
-            IEnumerable<string> targetSolutions = Directory.EnumerateFiles(targetDirectory, "*.sln", SearchOption.AllDirectories);
+            IEnumerable<string> targetSolutions =
+                Directory
+                .EnumerateFiles(targetDirectory, "*.sln", SearchOption.AllDirectories)
+                .Where(targetSolution => ShouldProcessSolution(targetSolution, ignoredSolutionPatterns));
 
             Parallel.ForEach(targetSolutions, targetSolution =>
             {
@@ -161,6 +213,20 @@ namespace VisualStudioSolutionUpdater
             );
 
             return numberOfFixedSolutions;
+        }
+
+        private static bool ShouldProcessSolution(string targetSolution, IEnumerable<string> ignoredSolutionPatterns)
+        {
+            bool shouldProcessSolution = true;
+
+            bool isSolutionIgnored = ignoredSolutionPatterns.Any(ignoredPatterns => Regex.IsMatch(targetSolution, ignoredPatterns));
+
+            if(isSolutionIgnored)
+            {
+                shouldProcessSolution = false;
+            }
+
+            return shouldProcessSolution;
         }
     }
 }

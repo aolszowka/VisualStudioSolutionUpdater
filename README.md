@@ -27,7 +27,7 @@ Currently this tool **WILL NOT** add Configuration information to the Solution; 
 
 ## Usage
 ```
-Usage: VisualStudioSolutionUpdater [validate] directory/solution
+Usage: VisualStudioSolutionUpdater [validate] directory/solution [ignore.txt]
 
 Given either a Visual Studio Solution (*.sln) or a Directory to Scan; Validate
 or update any solution file that is missing an N-Order ProjectReference Project
@@ -35,14 +35,19 @@ in the Solution File.
 
 Invalid Command/Arguments. Valid commands are:
 
-[directory/solution]  - [MODIFIES] If given a solution file or a directory
-                        find all solution files then opening each solution
-                        find all N-Order ProjectReference projects, then add
-                        any missing projects to the Solution file into a
-                        Solution Subfolder called "Dependencies" saving the
-                        the results back to disk.
-validate [dir/sln]    - [READS] Performs the above operation but instead
-                        do not write the solution back to the disk.
+Directory-Solution [IgnorePatterns.txt]
+    [MODIFIES] If given a solution file or a directory find all solution
+    files then opening each solution find all N-Order ProjectReference projects,
+    then add any missing projects to the Solution file into a Solution Subfolder
+    called "Dependencies" saving the the results back to disk.
+
+validate Directory-Solution [IgnorePatterns.txt]
+    [READS] Performs the above operation but instead do not write the solution
+    back to the disk.
+
+In all cases you can provide an optional argument of IgnorePatterns.txt (you
+can use any filename) which should be a plain text file of regular expression
+filters of solution files you DO NOT want this tool to operate on.
 ```
 
 ## Hacking
