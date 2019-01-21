@@ -54,7 +54,7 @@ filters of solution files you DO NOT want this tool to operate on.
 ### Supported Project Types
 The most likely change you will want to make is changing the supported project files. In theory this tool should support any MSBuild Project Format that utilizes a ProjectGuid.
 
-Start by looking at SolutionGenerationUtilities.SUPPORTED_PROJECT_TYPES and follow the rabbit trail from there.
+Start by looking at `SolutionGenerationUtilities.SUPPORTED_PROJECT_TYPES` and follow the rabbit trail from there.
 
 ### Configuration Generation
 What really needs to happen is we need a usable API for creating Solution Files; baring that one possible solution would be to reverse engineer what Visual Studio is doing to create the various configuration elements. THIS IS NOT TRIVIAL.
