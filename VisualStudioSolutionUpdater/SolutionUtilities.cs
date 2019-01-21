@@ -35,7 +35,7 @@ namespace VisualStudioSolutionUpdater
             }
             else
             {
-                dependenciesFolderGuid = Guid.NewGuid().ToString("B");
+                dependenciesFolderGuid = "{DA34CE5D-031A-4C97-8DE8-A81F98C0288A}";
                 dependenciesFolderFound = false;
             }
 

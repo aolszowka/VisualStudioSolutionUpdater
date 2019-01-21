@@ -21,6 +21,7 @@ For Each Solution File
 
 The tool will then:
 * (If it does not exist) Create a Solution Folder ([Microsoft Docs: SolutionFolder Interface](https://docs.microsoft.com/en-us/dotnet/api/envdte80.solutionfolder?view=visualstudiosdk-2017)) called "Dependencies"
+    * Note that this tool now uses a hard-coded GUID for the "Dependencies" solution folder (if an existing one does not exist); see the Hacking Section for more information.
 * Add all additional projects into this Solution Folder
 
 Currently this tool **WILL NOT** add Configuration information to the Solution; you are still REQUIRED to manually open the solution to blow this information in.
@@ -51,6 +52,13 @@ filters of solution files you DO NOT want this tool to operate on.
 ```
 
 ## Hacking
+### Dependencies (Solution Folder)
+Previously this tool generated a new GUID on run if the solution did not have an existing Solution Folder called "Dependencies" this was changed to now use a hard-coded GUID for this purpose.
+
+The reasoning is that if you have multiple branches of your code base where you are intending to run this tool you need consistency between versions in the solution file. Using a hard-coded value allows you to do this.
+
+If this is not desired look at changing `SolutionUtilities.TryGetDepedenciesFolderGuid(SolutionFile, String)`
+
 ### Supported Project Types
 The most likely change you will want to make is changing the supported project files. In theory this tool should support any MSBuild Project Format that utilizes a ProjectGuid.
 
