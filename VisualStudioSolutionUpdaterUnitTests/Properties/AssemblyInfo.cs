@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("VisualStudioSolutionUpdater")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("VisualStudioSolutionUpdaterUnitTests")]
+[assembly: AssemblyDescription("Unit Tests for the Visual Studio Solution Updater")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Ace Olszowka")]
-[assembly: AssemblyProduct("VisualStudioSolutionUpdater")]
-[assembly: AssemblyCopyright("Copyright © Ace Olszowka 2018-2019")]
+[assembly: AssemblyProduct("VisualStudioSolutionUpdaterUnitTests")]
+[assembly: AssemblyCopyright("Copyright © Ace Olszowka 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,10 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("8c4dd05b-c418-446f-b02c-f58b54297430")]
-
-// Allow The Unit Test Assembly to see the Internal Methods
-[assembly:InternalsVisibleTo("VisualStudioSolutionUpdaterUnitTests")]
+[assembly: Guid("39a60321-d55f-4c04-b243-c812f84dac40")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -35,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.5")]
-[assembly: AssemblyFileVersion("1.0.0.5")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
