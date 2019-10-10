@@ -89,7 +89,7 @@ namespace VisualStudioSolutionUpdater
         public static void WriteSolutionFileToDisk(string solutionFilePath, IEnumerable<string> solutionLines)
         {
             // A 32kb Buffer seems to be about the best trade off
-            using (StreamWriter sw = new StreamWriter(solutionFilePath, false, new UTF8Encoding(false, true), 32768))
+            using (StreamWriter sw = new StreamWriter(solutionFilePath, false, new UTF8Encoding(true, true), 32768))
             {
                 foreach (string solutionLine in solutionLines)
                 {
