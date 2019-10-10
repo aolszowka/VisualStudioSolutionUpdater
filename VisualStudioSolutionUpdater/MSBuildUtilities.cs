@@ -141,6 +141,5 @@ namespace VisualStudioSolutionUpdater
 
             return resolvedReferences;
         }
-
     }
 }
