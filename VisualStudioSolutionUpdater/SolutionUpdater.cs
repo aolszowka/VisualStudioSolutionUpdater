@@ -70,15 +70,20 @@ namespace VisualStudioSolutionUpdater
                 dependencyFolderItems.Add(solutionFragment.ProjectGuid);
             }
 
-            // Perform the insertion
-            SolutionGenerationUtilities.WriteSolutionFileToDisk(targetSolution, _InsertProjectFragments(targetSolution, projectFragmentsToInsert).ToArray());
-            SolutionGenerationUtilities.WriteSolutionFileToDisk(targetSolution, _InsertDependencyFolderItems(targetSolution, dependenciesFolderGuid, dependencyFolderItems).ToArray());
+            // We only want to read the file once
+            string[] solutionLines = File.ReadLines(targetSolution).ToArray();
+
+            // Now each of these build upon each other; we need to evaluate
+            // each of the actions completely prior to the next step.
+            solutionLines = _InsertProjectFragments(solutionLines, projectFragmentsToInsert).ToArray();
+            solutionLines = _InsertDependencyFolderItems(solutionLines, dependenciesFolderGuid, dependencyFolderItems).ToArray();
+
+            // Finally write it out once
+            SolutionGenerationUtilities.WriteSolutionFileToDisk(targetSolution, solutionLines);
         }
 
-        internal static IEnumerable<string> _InsertProjectFragments(string targetSolution, IEnumerable<string> projectFragmentsToInsert)
+        internal static IEnumerable<string> _InsertProjectFragments(IEnumerable<string> existingSolutionLines, IEnumerable<string> projectFragmentsToInsert)
         {
-            // Load up the Existing Solution
-            IEnumerable<string> existingSolutionLines = File.ReadLines(targetSolution);
             bool insertPerformed = false;
 
             foreach (string existingSolutionLine in existingSolutionLines)
@@ -98,13 +103,13 @@ namespace VisualStudioSolutionUpdater
             }
         }
 
-        internal static IEnumerable<string> _InsertDependencyFolderItems(string targetSolution, string dependenciesFolderGuid, IEnumerable<string> dependencyFolderItems)
+        internal static IEnumerable<string> _InsertDependencyFolderItems(IEnumerable<string> existingSolutionLines, string dependenciesFolderGuid, IEnumerable<string> dependencyFolderItems)
         {
             string GLOBAL_SECTION_SENTINEL = "GlobalSection(NestedProjects) = preSolution";
             string END_GLOBAL_SENTINEL = "EndGlobal";
 
             // This really stinks because we have to scan the whole file to see if it has a (NestedProjects) section
-            bool hasNestedProjectGlobal = File.ReadLines(targetSolution).AsParallel().Any(lineInSolution => lineInSolution.Trim().Equals(GLOBAL_SECTION_SENTINEL));
+            bool hasNestedProjectGlobal = existingSolutionLines.AsParallel().Any(lineInSolution => lineInSolution.Trim().Equals(GLOBAL_SECTION_SENTINEL));
 
             // Now we have to read the whole file again and then depending
             // on if the nested global existed or not either append or create
@@ -112,7 +117,6 @@ namespace VisualStudioSolutionUpdater
             if (hasNestedProjectGlobal)
             {
                 // This happens when the Dependencies folder already existed
-                IEnumerable<string> existingSolutionLines = File.ReadLines(targetSolution);
                 bool insertionPointReached = false;
 
                 foreach (string existingLine in existingSolutionLines)
@@ -131,7 +135,6 @@ namespace VisualStudioSolutionUpdater
             else
             {
                 // This is performed when we need to create the Dependencies Folder
-                IEnumerable<string> existingSolutionLines = File.ReadLines(targetSolution);
                 bool insertionPointReached = false;
 
                 foreach (string existingLine in existingSolutionLines)
