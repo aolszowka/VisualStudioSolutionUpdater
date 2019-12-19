@@ -10,6 +10,7 @@ namespace VisualStudioSolutionUpdater
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using Microsoft.Build.Construction;
 
     public static class SolutionUpdater
     {
@@ -22,8 +23,11 @@ namespace VisualStudioSolutionUpdater
         {
             bool solutionModified = false;
 
+            // Parse the "SolutionFile" Structure Once
+            SolutionFile solution = SolutionFile.Parse(targetSolution);
+
             // Get a list of projects in the solution
-            string[] existingProjects = SolutionUtilities.GetProjectsFromSolution(targetSolution).ToArray();
+            string[] existingProjects = SolutionUtilities.GetProjectsFromSolution(solution).ToArray();
 
             // Get an updated list of dependencies
             string[] resolvedNOrderReferences = MSBuildUtilities.ProjectsIncludingNOrderDependencies(existingProjects).ToArray();
@@ -41,14 +45,14 @@ namespace VisualStudioSolutionUpdater
 
                 if (saveChanges)
                 {
-                    _InsertNewProjects(targetSolution, newReferences);
+                    _InsertNewProjects(targetSolution, solution, newReferences);
                 }
             }
 
             return solutionModified;
         }
 
-        internal static void _InsertNewProjects(string targetSolution, IEnumerable<string> newReferences)
+        internal static void _InsertNewProjects(string targetSolution, SolutionFile solution, IEnumerable<string> newReferences)
         {
             string solutionRoot = PathUtilities.AddTrailingSlash(Path.GetDirectoryName(targetSolution));
             List<string> projectFragmentsToInsert = new List<string>();
@@ -56,7 +60,7 @@ namespace VisualStudioSolutionUpdater
 
             // Perform all the generation of the elements to insert
             string dependenciesFolderGuid;
-            bool dependenciesFolderExists = SolutionUtilities.TryGetDepedenciesFolderGuid(targetSolution, out dependenciesFolderGuid);
+            bool dependenciesFolderExists = SolutionUtilities.TryGetDepedenciesFolderGuid(solution, out dependenciesFolderGuid);
 
             if (dependenciesFolderExists != true)
             {

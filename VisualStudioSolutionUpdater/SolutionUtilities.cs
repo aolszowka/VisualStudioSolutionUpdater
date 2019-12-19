@@ -42,23 +42,13 @@ namespace VisualStudioSolutionUpdater
             return dependenciesFolderFound;
         }
 
-        internal static bool TryGetDepedenciesFolderGuid(string targetSolution, out string dependenciesFolderGuid)
+        internal static IEnumerable<string> GetProjectsFromSolution(SolutionFile solution)
         {
-            SolutionFile solution = SolutionFile.Parse(targetSolution);
-            return TryGetDepedenciesFolderGuid(solution, out dependenciesFolderGuid);
-        }
-
-        internal static IEnumerable<string> GetProjectsFromSolution(string targetSolution)
-        {
-            SolutionFile solution = SolutionFile.Parse(targetSolution);
-            string solutionFolder = Path.GetDirectoryName(targetSolution);
-
             return
                 solution
                 .ProjectsInOrder
                 .Where(project => project.ProjectType != SolutionProjectType.SolutionFolder)
-                .Select(project => project.RelativePath)
-                .Select(projectRelativePath => PathUtilities.ResolveRelativePath(solutionFolder, projectRelativePath));
+                .Select(project => Path.GetFullPath(project.AbsolutePath));
         }
     }
 }
