@@ -28,8 +28,8 @@ namespace VisualStudioSolutionUpdater
         /// </summary>
         /// <param name="solutionRoot">The Directory that contains the solution file. This is used to generate the relative path to the CSPROJ File.</param>
         /// <param name="pathToProjFile">The fully qualified path to the Project File.</param>
-        /// <returns>A named Tuple where the first element is the projectFragment for a Visual Studio Solution and the second is the projectGuid.</returns>
-        internal static (string ProjectFragment, string ProjectGuid) FragmentForProject(string solutionRoot, string pathToProjFile)
+        /// <returns>A named Tuple where the first element is the projectFragment lines (in order) for a Visual Studio Solution and the second is the projectGuid.</returns>
+        internal static (IEnumerable<string> ProjectFragment, string ProjectGuid) FragmentForProject(string solutionRoot, string pathToProjFile)
         {
             string relativePathToProject = PathUtilities.GetRelativePath(solutionRoot, pathToProjFile);
             string projectTypeGuid = GetProjectTypeGuid(pathToProjFile);
@@ -39,8 +39,29 @@ namespace VisualStudioSolutionUpdater
             // Fix up relative paths to use backslash instead of forward slash
             relativePathToProject = relativePathToProject.Replace('/', '\\');
 
-            string fragment = "Project(\"{0}\") = \"{1}\", \"{2}\", \"{3}\"\r\nEndProject";
-            return (string.Format(fragment, projectTypeGuid, projectName, relativePathToProject, projectGuid), projectGuid);
+            string[] fragment =
+                new string[]
+                {
+                    $"Project(\"{projectTypeGuid}\") = \"{projectName}\", \"{relativePathToProject}\", \"{projectGuid}\"",
+                    $"EndProject",
+        };
+            return (fragment, projectGuid);
+        }
+
+        /// <summary>
+        ///    Generates a "Configuration Fragment" that contains the lines to
+        /// add to a Visual Studio Solution file when adding a new project.
+        /// </summary>
+        /// <param name="projectGuid">The GUID of the project being added.</param>
+        /// <param name="solutionConfigurations">The configurations for this solution.</param>
+        /// <returns>The lines (in order) that would need to be added to the Solution Configuration section for this Project.</returns>
+        internal static IEnumerable<string> FragmentForSolutionConfiguration(string projectGuid, IEnumerable<string> solutionConfigurations)
+        {
+            foreach(var config in solutionConfigurations)
+            {
+                yield return $"\t\t{projectGuid}.{config}.ActiveCfg = {config}";
+                yield return $"\t\t{projectGuid}.{config}.Build.0 = {config}";
+            }
         }
 
         /// <summary>
@@ -49,11 +70,16 @@ namespace VisualStudioSolutionUpdater
         /// </summary>
         /// <param name="solutionFolderName">The name of the folder to add.</param>
         /// <param name="solutionFolderGuid">The GUID of the Solution; including the {}'s</param>
-        /// <returns>A <see cref="string"/> that represents a Solution Folder for a Visual Studio Solution.</returns>
-        internal static string FragmentForSolutionFolder(string solutionFolderName, string solutionFolderGuid)
+        /// <returns>An <see cref="IEnumerable{string}"/> that represents a Solution Folder for a Visual Studio Solution to be inserted in order.</returns>
+        internal static IEnumerable<string> FragmentForSolutionFolder(string solutionFolderName, string solutionFolderGuid)
         {
-            string fragmentPattern = "Project(\"{0}\") = \"{1}\", \"{1}\", \"{2}\"\r\nEndProject";
-            string fragment = string.Format(fragmentPattern, SOLUTION_FOLDER_TYPE_GUID, solutionFolderName, solutionFolderGuid);
+            string[] fragment =
+                new string[]
+                {
+                    $"Project(\"{SOLUTION_FOLDER_TYPE_GUID}\") = \"{solutionFolderName}\", \"{solutionFolderName}\", \"{solutionFolderGuid}\"",
+                    $"EndProject"
+                };
+
             return fragment;
         }
 

@@ -24,7 +24,7 @@ The tool will then:
     * Note that this tool now uses a hard-coded GUID for the "Dependencies" solution folder (if an existing one does not exist); see the Hacking Section for more information.
 * Add all additional projects into this Solution Folder
 
-Currently this tool **WILL NOT** add Configuration information to the Solution; you are still REQUIRED to manually open the solution to blow this information in.
+This tooling will try to emulate the default Visual Studio behavior with regards to Configuration Information which is: When a new project is added, it is added to ALL Solution Configurations with a default to build. If this is not desired behavior then you need to manually edit the solution file within Visual Studio.
 
 ## Usage
 ```
@@ -64,8 +64,8 @@ The most likely change you will want to make is changing the supported project f
 
 Start by looking at `SolutionGenerationUtilities.SUPPORTED_PROJECT_TYPES` and follow the rabbit trail from there.
 
-### Configuration Generation
-What really needs to happen is we need a usable API for creating Solution Files; baring that one possible solution would be to reverse engineer what Visual Studio is doing to create the various configuration elements. THIS IS NOT TRIVIAL.
+### API For Solution File Creation
+What really needs to happen is we need a usable API for creating Solution Files; much of this tooling could be deprecated if `dotnet new sln` and `dotnet sln` were more mature products (see https://github.com/dotnet/cli/issues/11679 for example).
 
 ## Contributing
 Pull requests and bug reports are welcomed so long as they are MIT Licensed.

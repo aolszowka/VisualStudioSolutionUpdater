@@ -50,5 +50,13 @@ namespace VisualStudioSolutionUpdater
                 .Where(project => project.ProjectType != SolutionProjectType.SolutionFolder)
                 .Select(project => Path.GetFullPath(project.AbsolutePath));
         }
+
+        internal static IEnumerable<string> GetSolutionConfigurations(SolutionFile solution)
+        {
+            foreach (SolutionConfigurationInSolution config in solution.SolutionConfigurations)
+            {
+                yield return config.FullName;
+            }
+        }
     }
 }

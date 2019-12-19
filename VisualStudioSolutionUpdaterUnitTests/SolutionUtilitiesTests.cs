@@ -36,6 +36,14 @@ namespace VisualStudioSolutionUpdaterUnitTests
 
             Assert.That(actual, Is.EqualTo(expected));
         }
+
+        [TestCaseSource(typeof(GetSolutionConfigurations_ValidArguments_Tests))]
+        public void GetSolutionConfigurations_ValidArguments(SolutionFile solution, IEnumerable<string> expected)
+        {
+            var actual = SolutionUtilities.GetSolutionConfigurations(solution);
+
+            Assert.That(actual, Is.EqualTo(expected));
+        }
     }
 
     internal class GetProjectsFromSolution_ValidArguments_Tests : IEnumerable
@@ -71,6 +79,22 @@ namespace VisualStudioSolutionUpdaterUnitTests
                 (
                     SolutionFile.Parse(Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestProjects\SimpleDependency\AllProjects.sln")),
                     "{DA34CE5D-031A-4C97-8DE8-A81F98C0288A}"
+                ).SetArgDisplayNames("AllProjects.sln");
+        }
+    }
+
+    internal class GetSolutionConfigurations_ValidArguments_Tests : IEnumerable
+    {
+        public IEnumerator GetEnumerator()
+        {
+            yield return new TestCaseData
+                (
+                    SolutionFile.Parse(Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestProjects\SimpleDependency\AllProjects.sln")),
+                    new string[]
+                    {
+                        "Debug|Any CPU",
+                        "Release|Any CPU",
+                    }
                 ).SetArgDisplayNames("AllProjects.sln");
         }
     }
