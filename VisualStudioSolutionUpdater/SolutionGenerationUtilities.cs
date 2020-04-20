@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="SolutionGenerationUtilities.cs" company="Ace Olszowka">
-//  Copyright (c) Ace Olszowka 2018-2019. All rights reserved.
+//  Copyright (c) Ace Olszowka 2018-2020. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -19,7 +19,8 @@ namespace VisualStudioSolutionUpdater
             new Dictionary<string, string>
             {
                 { ".csproj", "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}" },
-                { ".synproj", "{BBD0F5D1-1CC4-42FD-BA4C-A96779C64378}"}
+                { ".sqlproj", "{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}"},
+                { ".synproj", "{BBD0F5D1-1CC4-42FD-BA4C-A96779C64378}"},
             };
 
         /// <summary>
