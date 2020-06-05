@@ -28,27 +28,23 @@ This tooling will try to emulate the default Visual Studio behavior with regards
 
 ## Usage
 ```
-Usage: VisualStudioSolutionUpdater [validate] directory/solution [ignore.txt]
+Usage: VisualStudioSolutionUpdater directory/solution [-validate] [-ignorePattern=ignore.txt]
 
-Given either a Visual Studio Solution (*.sln) or a Directory to Scan; Validate
-or update any solution file that is missing an N-Order ProjectReference Project
-in the Solution File.
+Given either a Visual Studio Solution (*.sln) or a Directory to Scan; Validate or update any solution file that is missing an N-Order ProjectReference Project in the Solution File by putting them into a Solution sub-folder called "Dependencies".
+
+You can provide an optional argument of -ignorePatterns=IgnorePatterns.txt (you can use any filename) which should be a plain text file of regular expression filters of solution files you DO NOT want this tool to operate on.
+
+The optional -validate will tell this tool NOT to save changes but instead return an exit code equal to the number of projects that would have been modified.
 
 Invalid Command/Arguments. Valid commands are:
 
-Directory-Solution [IgnorePatterns.txt]
-    [MODIFIES] If given a solution file or a directory find all solution
-    files then opening each solution find all N-Order ProjectReference projects,
-    then add any missing projects to the Solution file into a Solution Subfolder
-    called "Dependencies" saving the the results back to disk.
-
-validate Directory-Solution [IgnorePatterns.txt]
-    [READS] Performs the above operation but instead do not write the solution
-    back to the disk.
-
-In all cases you can provide an optional argument of IgnorePatterns.txt (you
-can use any filename) which should be a plain text file of regular expression
-filters of solution files you DO NOT want this tool to operate on.
+  -v, --validate             Perform Validation Only, Save No Changes, Exit
+                               Code is Number of Solutions Modified.
+  -i, --ignore, --ignorePatterns=VALUE
+                             A plain-text file containing Regular Expressions
+                               (one per line) of solution file names/paths to
+                               ignore
+  -?, -h, --help             Show this message and exit
 ```
 
 ## Hacking

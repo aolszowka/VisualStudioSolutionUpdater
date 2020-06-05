@@ -19,7 +19,7 @@ namespace VisualStudioSolutionUpdater.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -61,17 +61,11 @@ namespace VisualStudioSolutionUpdater.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Usage: VisualStudioSolutionUpdater [validate] directory/solution [ignore.txt]
+        ///   Looks up a localized string similar to Usage: VisualStudioSolutionUpdater directory/solution [-validate] [-ignorePattern=ignore.txt]
         ///
-        ///Given either a Visual Studio Solution (*.sln) or a Directory to Scan; Validate
-        ///or update any solution file that is missing an N-Order ProjectReference Project
-        ///in the Solution File.
+        ///Given either a Visual Studio Solution (*.sln) or a Directory to Scan; Validate or update any solution file that is missing an N-Order ProjectReference Project in the Solution File by putting them into a Solution sub-folder called &quot;Dependencies&quot;.
         ///
-        ///Invalid Command/Arguments. Valid commands are:
-        ///
-        ///Directory-Solution [IgnorePatterns.txt]
-        ///    [MODIFIES] If given a solution file or a directory find all solution
-        ///    files then opening each solution find all N-Order ProjectReference projects, [rest of string was truncated]&quot;;.
+        ///You can provide an optional argument of -ignorePatterns=IgnorePatterns.txt (you can use any filename) which should be a plain text file of regular expression filters  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string HelpMessage {
             get {

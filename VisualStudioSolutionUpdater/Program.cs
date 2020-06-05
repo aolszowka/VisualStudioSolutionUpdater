@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="Program.cs" company="Ace Olszowka">
-//  Copyright (c) Ace Olszowka 2018-2019. All rights reserved.
+//  Copyright (c) Ace Olszowka 2018-2020. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -10,8 +10,11 @@ namespace VisualStudioSolutionUpdater
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+
+    using NDesk.Options;
 
     using VisualStudioSolutionUpdater.Properties;
 
@@ -27,110 +30,87 @@ namespace VisualStudioSolutionUpdater
         static void Main(string[] args)
         {
             int errorCode = 0;
+            string solutionOrDirectoryArgument = null;
+            bool isValidateTask = false;
+            string ignoredSolutionPatternsArgument = null;
+            bool showHelp = false;
 
-            if (args.Any())
+            OptionSet p = new OptionSet() {
+                { "<>", v => solutionOrDirectoryArgument = v },
+                { "v|validate", "Perform Validation Only, Save No Changes, Exit Code is Number of Solutions Modified.", v => isValidateTask = v != null },
+                {"i|ignore|ignorePatterns=", "A plain-text file containing Regular Expressions (one per line) of solution file names/paths to ignore", v=> ignoredSolutionPatternsArgument = v },
+                { "?|h|help", "Show this message and exit", v => showHelp = v != null },
+            };
+
+            // Parse the Options
+            try
             {
-                string command = args.First().ToLowerInvariant();
+                p.Parse(args);
+            }
+            catch (OptionException e)
+            {
+                Console.Write("VisualStudioSolutionUpdater: ");
+                Console.WriteLine(e.Message);
+                Console.WriteLine("Try `VisualStudioSolutionUpdater --help` for more information.");
+                return;
+            }
 
-                if (command.Equals("-?") || command.Equals("/?") || command.Equals("-help") || command.Equals("/help"))
+
+            if (showHelp || solutionOrDirectoryArgument == null)
+            {
+                errorCode = ShowUsage(p);
+            }
+            else
+            {
+                StringBuilder sb = new StringBuilder();
+
+                if (isValidateTask)
                 {
-                    errorCode = ShowUsage();
+                    sb.Append("Validating");
                 }
-                else if (command.Equals("validate"))
+                else
                 {
-                    if (args.Length < 2)
+                    sb.Append("Updating");
+                }
+
+                if (Directory.Exists(solutionOrDirectoryArgument))
+                {
+                    string[] ignoredSolutionPatterns = new string[0];
+                    if (ignoredSolutionPatternsArgument != null)
                     {
-                        string error = "You must provide either a file or directory as a second argument to use validate";
-                        Console.WriteLine(error);
-                        errorCode = 1;
+                        ignoredSolutionPatterns = _GetIgnoredSolutionPatterns(ignoredSolutionPatternsArgument).ToArray();
                     }
-                    else
+
+                    sb.Append($" all Visual Studio Solutions (*.sln) in `{solutionOrDirectoryArgument}`");
+
+                    if (ignoredSolutionPatterns.Any())
                     {
-                        // The second argument is a directory
-                        string targetArgument = args[1];
+                        sb.Append($" except those filtered by `{ignoredSolutionPatternsArgument}`");
+                    }
 
-                        if (Directory.Exists(targetArgument))
-                        {
-                            string[] ignoredSolutionPatterns = new string[0];
+                    Console.WriteLine(sb.ToString());
 
-                            if (args.Length == 2)
-                            {
-                                string validatingAllSolutions = $"Validating all solutions in `{targetArgument}`";
-                                Console.WriteLine(validatingAllSolutions);
-                            }
-                            else
-                            {
-                                string ignoredSolutionsArgument = args[2];
-                                string validatingAllSolutions = $"Validating all solutions in `{targetArgument}` except those filtered by `{ignoredSolutionsArgument}`";
-                                Console.WriteLine(validatingAllSolutions);
+                    errorCode = FixAllSolutions(solutionOrDirectoryArgument, ignoredSolutionPatterns, isValidateTask == false);
+                }
+                else if (File.Exists(solutionOrDirectoryArgument))
+                {
+                    // We need the Full Path
+                    solutionOrDirectoryArgument = new FileInfo(solutionOrDirectoryArgument).FullName;
 
-                                // Because we're going to constantly use this for lookups save it off
-                                ignoredSolutionPatterns = _GetIgnoredSolutionPatterns(ignoredSolutionsArgument).ToArray();
-                            }
+                    sb.Append($" Single Solution `{solutionOrDirectoryArgument}`");
+                    Console.WriteLine(sb.ToString());
 
-                            errorCode = FixAllSolutions(targetArgument, ignoredSolutionPatterns, false);
-                        }
-                        else if (File.Exists(targetArgument))
-                        {
-                            string validatingSingleFile = $"Validating solution `{targetArgument}`";
-                            Console.WriteLine(validatingSingleFile);
-                            if (UpdateSingleSolution(targetArgument, false))
-                            {
-                                errorCode = 1;
-                            }
-                        }
-                        else
-                        {
-                            string error = $"The provided path `{targetArgument}` is not a folder or file.";
-                            errorCode = 9009;
-                        }
+                    if (UpdateSingleSolution(solutionOrDirectoryArgument, isValidateTask == false))
+                    {
+                        errorCode = 1;
                     }
                 }
                 else
                 {
-                    string targetPath = command;
-
-                    if (Directory.Exists(targetPath))
-                    {
-                        IEnumerable<string> ignoredSolutionPatterns = new string[0];
-
-                        if (args.Length == 1)
-                        {
-                            string updatingAllSolutionsInDirectory = $"Updating all Visual Studio Solutions (*.sln) in `{targetPath}`";
-                            Console.WriteLine(updatingAllSolutionsInDirectory);
-                        }
-                        else
-                        {
-                            string ignoredSolutionsArgument = args[1];
-                            string updatingAllSolutionsInDirectory = $"Updating all solutions in `{targetPath}` except those filtered by `{ignoredSolutionsArgument}`";
-                            Console.WriteLine(updatingAllSolutionsInDirectory);
-
-                            // Because we're going to constantly use this for lookups save it off
-                            ignoredSolutionPatterns = _GetIgnoredSolutionPatterns(ignoredSolutionsArgument).ToArray();
-                        }
-
-                        FixAllSolutions(targetPath, ignoredSolutionPatterns, true);
-                        errorCode = 0;
-                    }
-                    else if (File.Exists(targetPath))
-                    {
-                        string updatingSingleFile = $"Updating solution `{targetPath}`";
-                        Console.WriteLine(updatingSingleFile);
-                        UpdateSingleSolution(targetPath, true);
-                        errorCode = 0;
-                    }
-                    else
-                    {
-                        string error = $"The specified path `{targetPath}` is not valid.";
-                        Console.WriteLine(error);
-                        errorCode = 1;
-                    }
+                    string error = $"The provided path `{solutionOrDirectoryArgument}` is not a folder or file.";
+                    Console.WriteLine(error);
+                    errorCode = 9009;
                 }
-            }
-            else
-            {
-                // This was a bad command
-                errorCode = ShowUsage();
             }
 
             Environment.Exit(errorCode);
@@ -152,9 +132,10 @@ namespace VisualStudioSolutionUpdater
             return ignoredPatterns;
         }
 
-        private static int ShowUsage()
+        private static int ShowUsage(OptionSet p)
         {
             Console.WriteLine(Resources.HelpMessage);
+            p.WriteOptionDescriptions(Console.Out);
             return 21;
         }
 
