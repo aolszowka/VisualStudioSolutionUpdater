@@ -12,6 +12,7 @@ namespace VisualStudioSolutionUpdater
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+
     using VisualStudioSolutionUpdater.Properties;
 
     class Program
@@ -221,7 +222,7 @@ namespace VisualStudioSolutionUpdater
 
             bool isSolutionIgnored = ignoredSolutionPatterns.Any(ignoredPatterns => Regex.IsMatch(targetSolution, ignoredPatterns));
 
-            if(isSolutionIgnored)
+            if (isSolutionIgnored)
             {
                 shouldProcessSolution = false;
             }

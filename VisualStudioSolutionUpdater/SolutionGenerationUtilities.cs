@@ -58,7 +58,7 @@ namespace VisualStudioSolutionUpdater
         /// <returns>The lines (in order) that would need to be added to the Solution Configuration section for this Project.</returns>
         internal static IEnumerable<string> FragmentForSolutionConfiguration(string projectGuid, IEnumerable<string> solutionConfigurations)
         {
-            foreach(var config in solutionConfigurations)
+            foreach (var config in solutionConfigurations)
             {
                 yield return $"\t\t{projectGuid}.{config}.ActiveCfg = {config}";
                 yield return $"\t\t{projectGuid}.{config}.Build.0 = {config}";

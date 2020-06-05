@@ -10,6 +10,7 @@ namespace VisualStudioSolutionUpdater
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+
     using Microsoft.Build.Construction;
 
     internal static class SolutionUtilities

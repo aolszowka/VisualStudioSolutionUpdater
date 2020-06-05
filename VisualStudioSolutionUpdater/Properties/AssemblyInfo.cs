@@ -23,7 +23,7 @@ using System.Runtime.InteropServices;
 [assembly: Guid("8c4dd05b-c418-446f-b02c-f58b54297430")]
 
 // Allow The Unit Test Assembly to see the Internal Methods
-[assembly:InternalsVisibleTo("VisualStudioSolutionUpdaterUnitTests")]
+[assembly: InternalsVisibleTo("VisualStudioSolutionUpdaterUnitTests")]
 
 // Version information for an assembly consists of the following four values:
 //

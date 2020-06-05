@@ -9,8 +9,11 @@ namespace VisualStudioSolutionUpdaterUnitTests
     using System.Collections;
     using System.Collections.Generic;
     using System.IO;
+
     using Microsoft.Build.Construction;
+
     using NUnit.Framework;
+
     using VisualStudioSolutionUpdater;
 
     /// <summary>
