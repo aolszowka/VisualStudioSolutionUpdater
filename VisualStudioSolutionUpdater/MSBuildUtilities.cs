@@ -57,9 +57,9 @@ namespace VisualStudioSolutionUpdater
         /// </summary>
         /// <param name="targetProject">The MSBuild Project to parse for project references.</param>
         /// <returns>An Enumerable of project references with the full system path.</returns>
-        public static IEnumerable<string> GetMSBuildProjectReferencesFullPath(string targetProject)
+        public static IEnumerable<string> GetMSBuildProjectReferencesFullPath(string targetProject, bool filterConditionalReferences)
         {
-            return GetMSBuildProjectReferencesRelative(targetProject).Select(relativePath => PathUtilities.ResolveRelativePath(Path.GetDirectoryName(targetProject), relativePath));
+            return GetMSBuildProjectReferencesRelative(targetProject, filterConditionalReferences).Select(relativePath => PathUtilities.ResolveRelativePath(Path.GetDirectoryName(targetProject), relativePath));
         }
 
         /// <summary>
@@ -68,10 +68,58 @@ namespace VisualStudioSolutionUpdater
         /// </summary>
         /// <param name="targetProject">The MSBuild Project to parse for project references.</param>
         /// <returns>An Enumerable of project references relative to the target project.</returns>
-        public static IEnumerable<string> GetMSBuildProjectReferencesRelative(string targetProject)
+        public static IEnumerable<string> GetMSBuildProjectReferencesRelative(string targetProject, bool filterConditionalReferences)
         {
-            XDocument synprojXml = XDocument.Load(targetProject);
-            return synprojXml.Descendants(msbuildNS + "ProjectReference").Select(projectReferenceNode => projectReferenceNode.Attribute("Include").Value);
+            XDocument projXml = XDocument.Load(targetProject);
+
+            // Grab All ProjectReferences, without regard to any Conditions
+            IEnumerable<XElement> projectReferences = projXml.Descendants(msbuildNS + "ProjectReference");
+
+            // If we need to filter based on conditions do so now
+            if (filterConditionalReferences)
+            {
+                projectReferences =
+                    projectReferences
+                    .Where(projectReferenceNode => MeetsConditions(projectReferenceNode));
+            }
+
+            IEnumerable<string> result =
+                projectReferences
+                .Select(projectReferenceNode => projectReferenceNode.Attribute("Include").Value);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Determines if the ProjectReference Node's Conditions are Met
+        /// </summary>
+        /// <param name="projectReferenceNode">The ProjectReference Tag to Evaluate</param>
+        /// <returns><c>true</c> if the conditions for this ProjectReference node are met; otherwise, <c>false</c>.</returns>
+        /// <remarks>
+        /// For now because we're loading the raw XML of the Project Format,
+        /// we do not understand these attributes such as Condition. As a
+        /// work around the initial implementation of this simply drops any
+        /// ProjectReference which has a conditional associated with it.
+        /// </remarks>
+        private static bool MeetsConditions(XElement projectReferenceNode)
+        {
+            bool isConditional = false;
+
+            var currentNode = projectReferenceNode;
+
+            while (currentNode != null)
+            {
+                if (currentNode.Attribute("Condition") != null)
+                {
+                    isConditional = true;
+                    break;
+                }
+
+                currentNode = currentNode.Parent;
+            }
+
+            // For now if the reference is conditional we need to return false
+            return isConditional == false;
         }
 
         /// <summary>
@@ -94,7 +142,7 @@ namespace VisualStudioSolutionUpdater
         /// </summary>
         /// <param name="projectList">A list of MSBuild Projects.</param>
         /// <returns>All Projects in the List INCLUDING their N-Order Dependencies AND Runtime References.</returns>
-        public static IEnumerable<string> ProjectsIncludingNOrderDependencies(IEnumerable<string> projectList)
+        public static IEnumerable<string> ProjectsIncludingNOrderDependencies(IEnumerable<string> projectList, bool filterConditionalReferences)
         {
             // Have our Resolved References
             SortedSet<string> resolvedReferences = new SortedSet<string>(StringComparer.InvariantCultureIgnoreCase);
@@ -114,7 +162,7 @@ namespace VisualStudioSolutionUpdater
                     resolvedReferences.Add(currentProjectToResolve);
 
                     // Get a list of all MSBuild ProjectReferences
-                    IEnumerable<string> projectReferences = GetMSBuildProjectReferencesFullPath(currentProjectToResolve);
+                    IEnumerable<string> projectReferences = GetMSBuildProjectReferencesFullPath(currentProjectToResolve, filterConditionalReferences);
 
                     // But only add those which have not already been resolved
                     foreach (string projectReference in projectReferences)

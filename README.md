@@ -28,11 +28,13 @@ This tooling will try to emulate the default Visual Studio behavior with regards
 
 ## Usage
 ```
-Usage: VisualStudioSolutionUpdater directory/solution [-validate] [-ignorePattern=ignore.txt]
+Usage: VisualStudioSolutionUpdater directory/solution [-validate] [-ignorePattern=ignore.txt] [-filterConditionalReferences]
 
 Given either a Visual Studio Solution (*.sln) or a Directory to Scan; Validate or update any solution file that is missing an N-Order ProjectReference Project in the Solution File by putting them into a Solution sub-folder called "Dependencies".
 
 You can provide an optional argument of -ignorePatterns=IgnorePatterns.txt (you can use any filename) which should be a plain text file of regular expression filters of solution files you DO NOT want this tool to operate on.
+
+The optional -filterConditionalReferences flag tells this tool to ignore any ProjectReference that has a conditional associated with it at any level.
 
 The optional -validate will tell this tool NOT to save changes but instead return an exit code equal to the number of projects that would have been modified.
 
@@ -40,6 +42,8 @@ Invalid Command/Arguments. Valid commands are:
 
   -v, --validate             Perform Validation Only, Save No Changes, Exit
                                Code is Number of Solutions Modified.
+  -f, --filter, --filterConditionalReferences
+                             Enable Filtering of Conditional References
   -i, --ignore, --ignorePatterns=VALUE
                              A plain-text file containing Regular Expressions
                                (one per line) of solution file names/paths to

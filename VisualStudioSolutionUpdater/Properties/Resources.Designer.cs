@@ -61,11 +61,11 @@ namespace VisualStudioSolutionUpdater.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Usage: VisualStudioSolutionUpdater directory/solution [-validate] [-ignorePattern=ignore.txt]
+        ///   Looks up a localized string similar to Usage: VisualStudioSolutionUpdater directory/solution [-validate] [-ignorePattern=ignore.txt] [-filterConditionalReferences]
         ///
         ///Given either a Visual Studio Solution (*.sln) or a Directory to Scan; Validate or update any solution file that is missing an N-Order ProjectReference Project in the Solution File by putting them into a Solution sub-folder called &quot;Dependencies&quot;.
         ///
-        ///You can provide an optional argument of -ignorePatterns=IgnorePatterns.txt (you can use any filename) which should be a plain text file of regular expression filters  [rest of string was truncated]&quot;;.
+        ///You can provide an optional argument of -ignorePatterns=IgnorePatterns.txt (you can use any filename) which should be a plain text file [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string HelpMessage {
             get {

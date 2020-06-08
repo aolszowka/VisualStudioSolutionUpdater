@@ -33,12 +33,14 @@ namespace VisualStudioSolutionUpdater
             string solutionOrDirectoryArgument = null;
             bool isValidateTask = false;
             string ignoredSolutionPatternsArgument = null;
+            bool filterConditionalReferences = false;
             bool showHelp = false;
 
             OptionSet p = new OptionSet() {
                 { "<>", v => solutionOrDirectoryArgument = v },
                 { "v|validate", "Perform Validation Only, Save No Changes, Exit Code is Number of Solutions Modified.", v => isValidateTask = v != null },
-                {"i|ignore|ignorePatterns=", "A plain-text file containing Regular Expressions (one per line) of solution file names/paths to ignore", v=> ignoredSolutionPatternsArgument = v },
+                { "f|filter|filterConditionalReferences", "Enable Filtering of Conditional References", v => filterConditionalReferences = v != null },
+                { "i|ignore|ignorePatterns=", "A plain-text file containing Regular Expressions (one per line) of solution file names/paths to ignore", v=> ignoredSolutionPatternsArgument = v },
                 { "?|h|help", "Show this message and exit", v => showHelp = v != null },
             };
 
@@ -88,9 +90,14 @@ namespace VisualStudioSolutionUpdater
                         sb.Append($" except those filtered by `{ignoredSolutionPatternsArgument}`");
                     }
 
+                    if (filterConditionalReferences)
+                    {
+                        sb.Append(" and filtering conditional references");
+                    }
+
                     Console.WriteLine(sb.ToString());
 
-                    errorCode = FixAllSolutions(solutionOrDirectoryArgument, ignoredSolutionPatterns, isValidateTask == false);
+                    errorCode = FixAllSolutions(solutionOrDirectoryArgument, ignoredSolutionPatterns, filterConditionalReferences, isValidateTask == false);
                 }
                 else if (File.Exists(solutionOrDirectoryArgument))
                 {
@@ -98,9 +105,15 @@ namespace VisualStudioSolutionUpdater
                     solutionOrDirectoryArgument = new FileInfo(solutionOrDirectoryArgument).FullName;
 
                     sb.Append($" Single Solution `{solutionOrDirectoryArgument}`");
+
+                    if (filterConditionalReferences)
+                    {
+                        sb.Append(" and filtering conditional references");
+                    }
+
                     Console.WriteLine(sb.ToString());
 
-                    if (UpdateSingleSolution(solutionOrDirectoryArgument, isValidateTask == false))
+                    if (UpdateSingleSolution(solutionOrDirectoryArgument, filterConditionalReferences, isValidateTask == false))
                     {
                         errorCode = 1;
                     }
@@ -145,13 +158,13 @@ namespace VisualStudioSolutionUpdater
         /// <param name="targetSolution">The solution to modify.</param>
         /// <param name="saveChanges">Indicates whether or not to save changes back to disk.</param>
         /// <returns><c>true</c> if the solution needed to be updated; otherwise, <c>false</c>.</returns>
-        static bool UpdateSingleSolution(string targetSolution, bool saveChanges)
+        static bool UpdateSingleSolution(string targetSolution, bool filterConditionalReferences, bool saveChanges)
         {
             bool solutionUpdated = false;
 
             try
             {
-                solutionUpdated = SolutionUpdater.Update(targetSolution, saveChanges);
+                solutionUpdated = SolutionUpdater.Update(targetSolution, filterConditionalReferences, saveChanges);
 
                 if (solutionUpdated)
                 {
@@ -176,7 +189,7 @@ namespace VisualStudioSolutionUpdater
         /// <param name="ignoredSolutionPatterns">An IEnumerable of ignored solution patterns.</param>
         /// <param name="saveChanges">Indicates whether or not to save the changes to the solutions.</param>
         /// <returns>An <see cref="int"/> indicating the number of solution files that were updated.</returns>
-        static int FixAllSolutions(string targetDirectory, IEnumerable<string> ignoredSolutionPatterns, bool saveChanges)
+        static int FixAllSolutions(string targetDirectory, IEnumerable<string> ignoredSolutionPatterns, bool filterConditionalReferences, bool saveChanges)
         {
             int numberOfFixedSolutions = 0;
 
@@ -187,7 +200,7 @@ namespace VisualStudioSolutionUpdater
 
             Parallel.ForEach(targetSolutions, targetSolution =>
             {
-                if (UpdateSingleSolution(targetSolution, saveChanges))
+                if (UpdateSingleSolution(targetSolution, filterConditionalReferences, saveChanges))
                 {
                     numberOfFixedSolutions++;
                 }

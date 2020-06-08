@@ -20,14 +20,14 @@ namespace VisualStudioSolutionUpdater
         /// </summary>
         /// <param name="targetSolution">The solution file to update</param>
         /// <returns><c>true</c> if the solution was updated; otherwise, <c>false</c>.</returns>
-        public static bool Update(string targetSolution, bool saveChanges)
+        public static bool Update(string targetSolution, bool filterConditionalReferences, bool saveChanges)
         {
             bool solutionModified = false;
 
             // Parse the "SolutionFile" Structure Once
             SolutionFile solution = SolutionFile.Parse(targetSolution);
 
-            string[] newReferences = GetNewDependenciesInSolution(solution);
+            string[] newReferences = GetNewDependenciesInSolution(solution, filterConditionalReferences);
 
             if (newReferences.Length == 0)
             {
@@ -52,13 +52,13 @@ namespace VisualStudioSolutionUpdater
         /// </summary>
         /// <param name="solution">The Solution file to examine.</param>
         /// <returns>The new projects for the given solution</returns>
-        internal static string[] GetNewDependenciesInSolution(SolutionFile solution)
+        internal static string[] GetNewDependenciesInSolution(SolutionFile solution, bool filterConditionalReferences)
         {
             // Get a list of projects in the solution
             IEnumerable<string> existingProjects = SolutionUtilities.GetProjectsFromSolution(solution);
 
             // Get an updated list of dependencies
-            IEnumerable<string> resolvedNOrderReferences = MSBuildUtilities.ProjectsIncludingNOrderDependencies(existingProjects);
+            IEnumerable<string> resolvedNOrderReferences = MSBuildUtilities.ProjectsIncludingNOrderDependencies(existingProjects, filterConditionalReferences);
 
             // Filter to only new projects
             string[] newReferences = resolvedNOrderReferences.Except(existingProjects, StringComparer.InvariantCultureIgnoreCase).ToArray();
