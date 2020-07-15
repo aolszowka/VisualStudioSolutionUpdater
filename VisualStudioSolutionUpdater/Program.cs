@@ -97,7 +97,19 @@ namespace VisualStudioSolutionUpdater
 
                     Console.WriteLine(sb.ToString());
 
-                    errorCode = FixAllSolutions(solutionOrDirectoryArgument, ignoredSolutionPatterns, filterConditionalReferences, isValidateTask == false);
+                    (int UpdatedSolutions, int BadSolutions) FixAllSolutionsResult =
+                        FixAllSolutions(solutionOrDirectoryArgument, ignoredSolutionPatterns, filterConditionalReferences, isValidateTask == false);
+
+                    if (FixAllSolutionsResult.BadSolutions != 0)
+                    {
+                        Console.WriteLine($"There were `{FixAllSolutionsResult.BadSolutions}` encountered. The exit code is non-zero indicating failure; however there have been `{FixAllSolutionsResult.UpdatedSolutions}` that where in need of update as well.");
+                        // If we had any bad solutions we need to have our error code be negative
+                        errorCode = FixAllSolutionsResult.BadSolutions * -1;
+                    }
+                    else
+                    {
+                        errorCode = FixAllSolutionsResult.UpdatedSolutions;
+                    }
                 }
                 else if (File.Exists(solutionOrDirectoryArgument))
                 {
@@ -113,9 +125,20 @@ namespace VisualStudioSolutionUpdater
 
                     Console.WriteLine(sb.ToString());
 
-                    if (UpdateSingleSolution(solutionOrDirectoryArgument, filterConditionalReferences, isValidateTask == false))
+                    try
                     {
-                        errorCode = 1;
+                        if (UpdateSingleSolution(solutionOrDirectoryArgument, filterConditionalReferences, isValidateTask == false))
+                        {
+                            errorCode = 1;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // If we encounter an exception attempting to update this solution then we should error
+                        // with a negative exit code.
+                        string errorMessage = $"Bad Solution `{solutionOrDirectoryArgument}` Error `{ex.Message}`";
+                        Console.WriteLine(errorMessage);
+                        errorCode = -1;
                     }
                 }
                 else
@@ -160,22 +183,11 @@ namespace VisualStudioSolutionUpdater
         /// <returns><c>true</c> if the solution needed to be updated; otherwise, <c>false</c>.</returns>
         static bool UpdateSingleSolution(string targetSolution, bool filterConditionalReferences, bool saveChanges)
         {
-            bool solutionUpdated = false;
+            bool solutionUpdated = SolutionUpdater.Update(targetSolution, filterConditionalReferences, saveChanges);
 
-            try
+            if (solutionUpdated)
             {
-                solutionUpdated = SolutionUpdater.Update(targetSolution, filterConditionalReferences, saveChanges);
-
-                if (solutionUpdated)
-                {
-                    Console.WriteLine(targetSolution);
-                }
-            }
-            catch (Exception ex)
-            {
-                string errorMessage = $"Bad Solution `{targetSolution}` Error `{ex.Message}`";
-
-                Console.WriteLine(errorMessage);
+                Console.WriteLine(targetSolution);
             }
 
             return solutionUpdated;
@@ -189,8 +201,9 @@ namespace VisualStudioSolutionUpdater
         /// <param name="ignoredSolutionPatterns">An IEnumerable of ignored solution patterns.</param>
         /// <param name="saveChanges">Indicates whether or not to save the changes to the solutions.</param>
         /// <returns>An <see cref="int"/> indicating the number of solution files that were updated.</returns>
-        static int FixAllSolutions(string targetDirectory, IEnumerable<string> ignoredSolutionPatterns, bool filterConditionalReferences, bool saveChanges)
+        static (int UpdatedSolutions, int BadSolutions) FixAllSolutions(string targetDirectory, IEnumerable<string> ignoredSolutionPatterns, bool filterConditionalReferences, bool saveChanges)
         {
+            int numberOfBadSolutions = 0;
             int numberOfFixedSolutions = 0;
 
             IEnumerable<string> targetSolutions =
@@ -200,14 +213,24 @@ namespace VisualStudioSolutionUpdater
 
             Parallel.ForEach(targetSolutions, targetSolution =>
             {
-                if (UpdateSingleSolution(targetSolution, filterConditionalReferences, saveChanges))
+                try
                 {
-                    numberOfFixedSolutions++;
+                    if (UpdateSingleSolution(targetSolution, filterConditionalReferences, saveChanges))
+                    {
+                        numberOfFixedSolutions++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // If we encounter an exception for any reason we need to increase the number of bad solutions
+                    string errorMessage = $"Bad Solution `{targetSolution}` Error `{ex.Message}`";
+                    Console.WriteLine(errorMessage);
+                    numberOfBadSolutions++;
                 }
             }
             );
 
-            return numberOfFixedSolutions;
+            return (numberOfFixedSolutions, numberOfBadSolutions);
         }
 
         private static bool ShouldProcessSolution(string targetSolution, IEnumerable<string> ignoredSolutionPatterns)
