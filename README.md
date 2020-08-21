@@ -72,3 +72,6 @@ Pull requests and bug reports are welcomed so long as they are MIT Licensed.
 
 ## License
 This tool is MIT Licensed.
+
+## Third Party Licenses
+This project uses other open source contributions see [LICENSES.md](LICENSES.md) for a comprehensive listing.
