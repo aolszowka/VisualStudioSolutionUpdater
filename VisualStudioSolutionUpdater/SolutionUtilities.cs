@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="SolutionUtilities.cs" company="Ace Olszowka">
-//  Copyright (c) Ace Olszowka 2018-2019. All rights reserved.
+//  Copyright (c) Ace Olszowka 2018-2020. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -21,12 +21,19 @@ namespace VisualStudioSolutionUpdater
             dependenciesFolderGuid = string.Empty;
 
             ProjectInSolution[] dependenciesFolders =
-                targetSolution.ProjectsInOrder.Where(project => project.ProjectType == SolutionProjectType.SolutionFolder).Where(projectSolutionFolder => projectSolutionFolder.ProjectName.Equals("Dependencies")).ToArray();
+                targetSolution
+                .ProjectsInOrder
+                .Where(project => project.ProjectType == SolutionProjectType.SolutionFolder)
+                .Where(projectSolutionFolder => projectSolutionFolder.ProjectName.Equals("Dependencies"))
+                .ToArray();
 
             if (dependenciesFolders.Length == 1)
             {
                 // Best case is a folder already exist with this project; return its Guid
-                dependenciesFolderGuid = dependenciesFolders.First().ProjectGuid;
+                dependenciesFolderGuid =
+                    dependenciesFolders
+                    .First()
+                    .ProjectGuid;
                 dependenciesFolderFound = true;
             }
             else if (dependenciesFolders.Length > 1)

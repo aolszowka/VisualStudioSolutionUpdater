@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="SolutionUpdater.cs" company="Ace Olszowka">
-//  Copyright (c) Ace Olszowka 2018-2019. All rights reserved.
+//  Copyright (c) Ace Olszowka 2018-2020. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -173,7 +173,10 @@ namespace VisualStudioSolutionUpdater
             string END_GLOBALSECTION_SENTINEL = "EndGlobalSection";
 
             // This really stinks because we have to scan the whole file to see if it has a (NestedProjects) section
-            bool hasNestedProjectGlobal = existingSolutionLines.AsParallel().Any(lineInSolution => lineInSolution.Trim().Equals(GLOBAL_SECTION_SENTINEL));
+            bool hasNestedProjectGlobal =
+                existingSolutionLines
+                .AsParallel()
+                .Any(lineInSolution => lineInSolution.Trim().Equals(GLOBAL_SECTION_SENTINEL));
 
             // Now we have to read the whole file again and then depending
             // on if the nested global existed or not either append or create

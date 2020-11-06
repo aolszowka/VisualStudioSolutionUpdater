@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="PathUtilities.cs" company="Ace Olszowka">
-//  Copyright (c) Ace Olszowka 2017-2019. All rights reserved.
+//  Copyright (c) Ace Olszowka 2017-2020. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -23,9 +23,9 @@ namespace VisualStudioSolutionUpdater
         {
             string returnValue = directory;
 
-            if (!returnValue.EndsWith(@"\"))
+            if (!returnValue.EndsWith(Path.DirectorySeparatorChar))
             {
-                returnValue = returnValue + @"\";
+                returnValue = returnValue + Path.DirectorySeparatorChar;
             }
 
             return returnValue;
@@ -87,8 +87,21 @@ namespace VisualStudioSolutionUpdater
         /// <returns>The "expanded" path.</returns>
         public static string ResolveRelativePath(string baseDirectory, string relativePath)
         {
-            string absolutePath = Path.Combine(baseDirectory, relativePath);
-            return Path.GetFullPath((new Uri(absolutePath)).LocalPath);
+            string absolutePath = Path.GetFullPath(Path.Combine(baseDirectory, FixUpPathDelimiter(relativePath)));
+            return absolutePath;
+        }
+
+        /// <summary>
+        /// MSBuild uses a Windows Style Delimiter for its relative path
+        /// However in Other OSes (Linux/macOS) this is not correct perform
+        /// a fixup prior to load.
+        /// </summary>
+        /// <param name="path">The path, usually relative, from MSBuild</param>
+        /// <returns>The path with the correct DirectorySeparatorChar</returns>
+        public static string FixUpPathDelimiter(string path)
+        {
+            path = path.Replace('\\', Path.DirectorySeparatorChar);
+            return path;
         }
     }
 }

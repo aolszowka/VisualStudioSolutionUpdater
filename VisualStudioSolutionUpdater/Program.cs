@@ -37,11 +37,11 @@ namespace VisualStudioSolutionUpdater
             bool showHelp = false;
 
             OptionSet p = new OptionSet() {
-                { "<>", v => solutionOrDirectoryArgument = v },
-                { "v|validate", "Perform Validation Only, Save No Changes, Exit Code is Number of Solutions Modified.", v => isValidateTask = v != null },
-                { "f|filter|filterConditionalReferences", "Enable Filtering of Conditional References", v => filterConditionalReferences = v != null },
-                { "i|ignore|ignorePatterns=", "A plain-text file containing Regular Expressions (one per line) of solution file names/paths to ignore", v=> ignoredSolutionPatternsArgument = v },
-                { "?|h|help", "Show this message and exit", v => showHelp = v != null },
+                { "<>", Strings.TargetArgumentDescription, v => solutionOrDirectoryArgument = v },
+                { "v|validate", Strings.ValidateDescription, v => isValidateTask = v != null },
+                { "f|filter|filterConditionalReferences", Strings.FilterConditionalReferencesDescription, v => filterConditionalReferences = v != null },
+                { "i|ignore|ignorePatterns=", Strings.IgnoreDescription, v=> ignoredSolutionPatternsArgument = v },
+                { "?|h|help", Strings.HelpDescription, v => showHelp = v != null },
             };
 
             // Parse the Options
@@ -49,11 +49,11 @@ namespace VisualStudioSolutionUpdater
             {
                 p.Parse(args);
             }
-            catch (OptionException e)
+            catch (OptionException)
             {
-                Console.Write("VisualStudioSolutionUpdater: ");
-                Console.WriteLine(e.Message);
-                Console.WriteLine("Try `VisualStudioSolutionUpdater --help` for more information.");
+                Console.WriteLine(Strings.ShortUsageMessage);
+                Console.WriteLine($"Try `{Strings.ProgramName} --help` for more information.");
+                Environment.ExitCode = 21;
                 return;
             }
 
@@ -170,7 +170,11 @@ namespace VisualStudioSolutionUpdater
 
         private static int ShowUsage(OptionSet p)
         {
-            Console.WriteLine(Resources.HelpMessage);
+            Console.WriteLine(Strings.ShortUsageMessage);
+            Console.WriteLine();
+            Console.WriteLine(Strings.LongDescription);
+            Console.WriteLine();
+            Console.WriteLine($"               <>            {Strings.TargetArgumentDescription}");
             p.WriteOptionDescriptions(Console.Out);
             return 21;
         }

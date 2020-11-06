@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="Program.cs" company="Ace Olszowka">
-//  Copyright (c) Ace Olszowka 2019. All rights reserved.
+// <copyright file="SolutionUtilitiesTests.cs" company="Ace Olszowka">
+//  Copyright (c) Ace Olszowka 2019-2020. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -55,20 +55,20 @@ namespace VisualStudioSolutionUpdaterUnitTests
         {
             yield return new TestCaseData
                 (
-                    SolutionFile.Parse(Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestProjects\SimpleDependency\AllProjects.sln")),
+                    SolutionFile.Parse(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestProjects", "SimpleDependency", "AllProjects.sln")),
                     new string[]
                     {
-                        Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestProjects\SimpleDependency\A\A.csproj"),
-                        Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestProjects\SimpleDependency\B\B.csproj"),
-                        Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestProjects\SimpleDependency\C\C.csproj"),
+                        Path.Combine(TestContext.CurrentContext.TestDirectory, "TestProjects","SimpleDependency","A","A.csproj"),
+                        Path.Combine(TestContext.CurrentContext.TestDirectory, "TestProjects","SimpleDependency","B","B.csproj"),
+                        Path.Combine(TestContext.CurrentContext.TestDirectory, "TestProjects","SimpleDependency","C","C.csproj"),
                     }
                 ).SetArgDisplayNames("AllProjects.sln");
             yield return new TestCaseData
                 (
-                    SolutionFile.Parse(Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestProjects\SimpleDependency\FromPerspective_A_Unpopulated.sln")),
+                    SolutionFile.Parse(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestProjects", "SimpleDependency", "FromPerspective_A_Unpopulated.sln")),
                     new string[]
                     {
-                        Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestProjects\SimpleDependency\A\A.csproj"),
+                        Path.Combine(TestContext.CurrentContext.TestDirectory, "TestProjects","SimpleDependency","A","A.csproj"),
                     }
                 ).SetArgDisplayNames("FromPerspective_A_Unpopulated.sln");
         }
@@ -80,7 +80,7 @@ namespace VisualStudioSolutionUpdaterUnitTests
         {
             yield return new TestCaseData
                 (
-                    SolutionFile.Parse(Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestProjects\SimpleDependency\AllProjects.sln")),
+                    SolutionFile.Parse(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestProjects", "SimpleDependency", "AllProjects.sln")),
                     "{DA34CE5D-031A-4C97-8DE8-A81F98C0288A}"
                 ).SetArgDisplayNames("AllProjects.sln");
         }
@@ -92,7 +92,7 @@ namespace VisualStudioSolutionUpdaterUnitTests
         {
             yield return new TestCaseData
                 (
-                    SolutionFile.Parse(Path.Combine(TestContext.CurrentContext.TestDirectory, @"TestProjects\SimpleDependency\AllProjects.sln")),
+                    SolutionFile.Parse(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestProjects", "SimpleDependency", "AllProjects.sln")),
                     new string[]
                     {
                         "Debug|Any CPU",

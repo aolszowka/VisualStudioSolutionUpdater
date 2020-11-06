@@ -1,4 +1,6 @@
 # VisualStudioSolutionUpdater
+![CI - Master](https://github.com/aolszowka/VisualStudioSolutionUpdater/workflows/CI/badge.svg?branch=master)
+
 Utility program to Validate or Update Visual Studio Fix Solution Files (SLN) to Include their N-Order Project References
 
 ## When To Use This Tool
@@ -27,19 +29,35 @@ The tool will then:
 This tooling will try to emulate the default Visual Studio behavior with regards to Configuration Information which is: When a new project is added, it is added to ALL Solution Configurations with a default to build. If this is not desired behavior then you need to manually edit the solution file within Visual Studio.
 
 ## Usage
+There are now two ways to run this tool:
+
+1. (Compiled Executable) Invoke the tool via `VisualStudioSolutionUpdater` and pass the arguments.
+2. (Dotnet Tool) Install this tool using the following command `dotnet tool install VisualStudioSolutionUpdater` (assuming that you have the nuget package in your feed) then invoke it via `dotnet update-solution`
+
+In both cases the flags to the tooling are identical:
+
 ```
-Usage: VisualStudioSolutionUpdater directory/solution [-validate] [-ignorePattern=ignore.txt] [-filterConditionalReferences]
+Usage: Directory-or-Solution [-validate] [-ignorePatterns=ignore.txt] [-filterConditionalReferences]
 
-Given either a Visual Studio Solution (*.sln) or a Directory to Scan; Validate or update any solution file that is missing an N-Order ProjectReference Project in the Solution File by putting them into a Solution sub-folder called "Dependencies".
+Validate or update any solution file that is missing an N-Order ProjectReference
+Project in the Solution File by putting them into a Solution sub-folder called
+"Dependencies".
 
-You can provide an optional argument of -ignorePatterns=IgnorePatterns.txt (you can use any filename) which should be a plain text file of regular expression filters of solution files you DO NOT want this tool to operate on.
+You can provide an optional argument of -ignorePatterns=IgnorePatterns.txt (you
+can use any filename) which should be a plain text file of regular expression
+filters of solution files you DO NOT want this tool to operate on.
 
-The optional -filterConditionalReferences flag tells this tool to ignore any ProjectReference that has a conditional associated with it at any level.
+The optional -filterConditionalReferences flag tells this tool to ignore any
+ProjectReference that has a conditional associated with it at any level.
 
-The optional -validate will tell this tool NOT to save changes but instead return an exit code equal to the number of projects that would have been modified.
+The optional -validate will tell this tool NOT to save changes but instead
+return an exit code equal to the number of projects that would have been
+modified.
 
-Invalid Command/Arguments. Valid commands are:
+Arguments:
 
+               <>            Either a Visual Studio Solution (*.sln) or
+                               Directory to scan for Visual Studio Solutions
   -v, --validate             Perform Validation Only, Save No Changes, Exit
                                Code is Number of Solutions Modified.
   -f, --filter, --filterConditionalReferences
@@ -66,6 +84,10 @@ Start by looking at `SolutionGenerationUtilities.SUPPORTED_PROJECT_TYPES` and fo
 
 ### API For Solution File Creation
 What really needs to happen is we need a usable API for creating Solution Files; much of this tooling could be deprecated if `dotnet new sln` and `dotnet sln` were more mature products (see https://github.com/dotnet/cli/issues/11679 for example).
+
+## GOTCHAs
+### Relative Paths
+The MSBuild Project format appears to use Windows style directory separator chars `\`, this can cause problems on other OSes supported by the .NET Core Runtime, it is believed these are all flushed out in the unit tests, but day to day usage of this tool really only occurs on Windows. I welcome any well formed bug reports!
 
 ## Contributing
 Pull requests and bug reports are welcomed so long as they are MIT Licensed.

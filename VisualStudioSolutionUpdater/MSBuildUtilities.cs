@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="MSBuildUtilities.cs" company="Ace Olszowka">
-//  Copyright (c) Ace Olszowka 2017-2019. All rights reserved.
+//  Copyright (c) Ace Olszowka 2017-2020. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -10,7 +10,6 @@ namespace VisualStudioSolutionUpdater
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Xml.Linq;
 
     public static class MSBuildUtilities
@@ -24,7 +23,11 @@ namespace VisualStudioSolutionUpdater
         /// <returns>The value of the FIRST property found matching the criteria.</returns>
         public static string GetProperty(XDocument projFile, string property)
         {
-            return projFile.Descendants(msbuildNS + property).First().Value;
+            return
+                projFile
+                .Descendants(msbuildNS + property)
+                .First()
+                .Value;
         }
 
         /// <summary>
@@ -34,8 +37,11 @@ namespace VisualStudioSolutionUpdater
         /// <returns>The specified proj File's Project GUID.</returns>
         public static string GetMSBuildProjectGuid(string pathToProjFile)
         {
-            XDocument projFile = XDocument.Load(pathToProjFile);
-            XElement projectGuid = projFile.Descendants(msbuildNS + "ProjectGuid").First();
+            XDocument projFile = XDocument.Load(PathUtilities.FixUpPathDelimiter(pathToProjFile));
+            XElement projectGuid =
+                projFile
+                .Descendants(msbuildNS + "ProjectGuid")
+                .First();
             return projectGuid.Value;
         }
 
@@ -46,8 +52,11 @@ namespace VisualStudioSolutionUpdater
         /// <returns>The specified project file's Project Name.</returns>
         public static string GetMSBuildProjectName(string pathToProjFile)
         {
-            XDocument projFile = XDocument.Load(pathToProjFile);
-            XElement projectName = projFile.Descendants(msbuildNS + "Name").First();
+            XDocument projFile = XDocument.Load(PathUtilities.FixUpPathDelimiter(pathToProjFile));
+            XElement projectName =
+                projFile
+                .Descendants(msbuildNS + "Name")
+                .First();
             return projectName.Value;
         }
 
@@ -59,7 +68,9 @@ namespace VisualStudioSolutionUpdater
         /// <returns>An Enumerable of project references with the full system path.</returns>
         public static IEnumerable<string> GetMSBuildProjectReferencesFullPath(string targetProject, bool filterConditionalReferences)
         {
-            return GetMSBuildProjectReferencesRelative(targetProject, filterConditionalReferences).Select(relativePath => PathUtilities.ResolveRelativePath(Path.GetDirectoryName(targetProject), relativePath));
+            return
+                GetMSBuildProjectReferencesRelative(targetProject, filterConditionalReferences)
+                .Select(relativePath => PathUtilities.ResolveRelativePath(Path.GetDirectoryName(targetProject), relativePath));
         }
 
         /// <summary>
@@ -70,10 +81,12 @@ namespace VisualStudioSolutionUpdater
         /// <returns>An Enumerable of project references relative to the target project.</returns>
         public static IEnumerable<string> GetMSBuildProjectReferencesRelative(string targetProject, bool filterConditionalReferences)
         {
-            XDocument projXml = XDocument.Load(targetProject);
+            XDocument projXml = XDocument.Load(PathUtilities.FixUpPathDelimiter(targetProject));
 
             // Grab All ProjectReferences, without regard to any Conditions
-            IEnumerable<XElement> projectReferences = projXml.Descendants(msbuildNS + "ProjectReference");
+            IEnumerable<XElement> projectReferences =
+                projXml
+                .Descendants(msbuildNS + "ProjectReference");
 
             // If we need to filter based on conditions do so now
             if (filterConditionalReferences)
@@ -129,9 +142,10 @@ namespace VisualStudioSolutionUpdater
         /// <returns>An enumerable that contains all of the RuntimeReference Include Values.</returns>
         public static IEnumerable<string> GetRuntimeReferences(string targetProject)
         {
-            XDocument projXml = XDocument.Load(targetProject);
+            XDocument projXml = XDocument.Load(PathUtilities.FixUpPathDelimiter(targetProject));
             return
-                projXml.Descendants(msbuildNS + "RuntimeReference")
+                projXml
+                .Descendants(msbuildNS + "RuntimeReference")
                 .Select(runtimeReference => runtimeReference.Attribute("Include").Value)
                 .Select(relativePath => PathUtilities.ResolveRelativePath(Path.GetDirectoryName(targetProject), relativePath));
         }
